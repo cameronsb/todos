@@ -1,8 +1,11 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 function App() {
     const [newTodo, updateNewTodo] = useState("");
     const [todos, updateTodos] = useState([]);
+
+    const firstRender = useRef(true);
+
     const handleInputChange = (e) => {
         updateNewTodo(e.target.value);
     };
@@ -20,6 +23,31 @@ function App() {
         updateTodos((prevTodos) => prevTodos.filter((todo) => todo.id !== id));
     };
 
+    const initTodosFromStorage = () => {
+        const todos = localStorage.getItem("todos");
+
+        if (todos) {
+            updateTodos(JSON.parse(todos));
+        }
+    };
+
+    const saveTodosToStorage = (todos) => {
+        localStorage.setItem("todos", JSON.stringify(todos));
+    };
+
+    useEffect(() => {
+        initTodosFromStorage();
+    }, []);
+
+    useEffect(() => {
+        if (firstRender.current) {
+            firstRender.current = false;
+            return;
+        }
+
+        saveTodosToStorage(todos);
+    }, [todos]);
+
     return (
         <div className="mx-auto max-w-lg w-full p-4 mt-[200px] border rounded-md flex flex-col gap-y-4 bg-white">
             <form onSubmit={handleSumbit} className="bg-white">
@@ -34,7 +62,7 @@ function App() {
             <div className="py-4 flex flex-col gap-y-2">
                 <h1 className="text-3xl font-extrabold">Todo List</h1>
 
-                {todos.length > 0 &&
+                {todos.length > 0 ? (
                     todos.map((todo) => (
                         <div
                             key={todo.id}
@@ -57,9 +85,8 @@ function App() {
                                 &#10006;
                             </button>
                         </div>
-                    ))}
-
-                {todos.length === 0 && (
+                    ))
+                ) : (
                     <p className="text-lg text-center h-[100px] p-4 bg-gray-50 rounded-md">
                         You're all done for today! <br />
                         <span className="text-sm text-gray-500">
