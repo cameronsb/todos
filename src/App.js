@@ -9,6 +9,7 @@ function App() {
     const [newTodo, updateNewTodo] = useState("");
     const [todos, updateTodos] = useState([]);
     const [visibleTodos, updateVisibleTodos] = useState([]);
+    const [loading, setLoading] = useState(true);
 
     const [hideOnComplete, updateHideOnComplete] = useState(false); // either remove or strike through
 
@@ -128,6 +129,8 @@ function App() {
         const todos = getTodosFromStorage();
         updateTodos(todos);
 
+        setLoading(false);
+
         const handleStorageChange = (e) => {
             if (e.key === "todos") {
                 const todos = getTodosFromStorage();
@@ -194,150 +197,162 @@ function App() {
     //     };
     // }, []);
 
-    return (
+    return !loading ? (
         <>
             <Toaster />
-            <div className="mx-auto max-w-lg w-full p-4 mt-[200px] border rounded-md flex flex-col gap-y-4 bg-white">
-                <form onSubmit={handleSubmit} className="bg-white">
-                    <input
-                        type="text"
-                        value={newTodo}
-                        onChange={handleInputChange}
-                        className="border-2 border-gray-400 rounded-lg p-2 w-full"
-                        placeholder="Add a new todo"
-                        autoFocus={true}
-                    />
-                </form>
-                <div className="py-4 flex flex-col gap-y-2">
-                    <div className="flex items-center justify-between">
-                        <h1 className="text-3xl font-extrabold flex items-center">
-                            <span>Todo List</span>
-
-                            {visibleTodos.length > 0 && (
-                                <span className="text-gray-300 text-xl ml-4 font-normal">
-                                    {/* show number of incomplete todos remaining */}
-                                    {
-                                        visibleTodos.filter(
-                                            (todo) => !todo.completed
-                                        ).length
-                                    }{" "}
-                                    of {todos.length} remaining
-                                </span>
-                            )}
-                        </h1>
-                        {/* Settings Menu */}
-                        <ControlledMenu
-                            triggerMarkup={
-                                <>
-                                    <span className="block">⚙️</span>
-                                    <h3 className="sr-only">Settings</h3>
-                                </>
-                            }
-                            options={getSettingsOptions()}
+            <section className="px-5">
+                <div className="mx-auto max-w-3xl w-full p-4 mt-[100px] border rounded-md flex flex-col gap-y-4 bg-white">
+                    <form onSubmit={handleSubmit} className="bg-white">
+                        <input
+                            type="text"
+                            value={newTodo}
+                            onChange={handleInputChange}
+                            className="border-2 border-gray-400 rounded-lg p-2 w-full"
+                            placeholder="Add a new todo"
+                            autoFocus={true}
                         />
-                    </div>
+                    </form>
+                    <div className="py-4 flex flex-col gap-y-2">
+                        <div className="flex items-center justify-between">
+                            <h1 className="text-3xl font-extrabold flex items-center">
+                                <span>Todo List</span>
 
-                    {/* clear all */}
-                    {todos.length > 0 && (
-                        <button
-                            onClick={() => {
-                                updateTodos([]);
-                            }}
-                            className="text-sm text-gray-500 hover:text-gray-700"
-                        >
-                            Clear all
-                        </button>
-                    )}
-
-                    {visibleTodos.length > 0 ? (
-                        visibleTodos.map((todo) => (
-                            <div
-                                key={todo.id}
-                                className={twMerge(
-                                    "text-lg p-2 w-full hover:bg-gray-100 flex items-center justify-between cursor-pointer group"
+                                {visibleTodos.length > 0 && (
+                                    <span className="text-gray-300 text-xl ml-4 font-normal">
+                                        {/* show number of incomplete todos remaining */}
+                                        {
+                                            visibleTodos.filter(
+                                                (todo) => !todo.completed
+                                            ).length
+                                        }{" "}
+                                        of {todos.length} remaining
+                                    </span>
                                 )}
-                                tabIndex={0}
-                                onKeyDown={(e) => {
-                                    if (e.key === "Enter") {
-                                        handleComplete(todo.id);
-                                    }
-                                }}
+                            </h1>
+                            {/* Settings Menu */}
+                            <ControlledMenu
+                                triggerMarkup={
+                                    <>
+                                        <span className="block">⚙️</span>
+                                        <h3 className="sr-only">Settings</h3>
+                                    </>
+                                }
+                                options={getSettingsOptions()}
+                            />
+                        </div>
+
+                        {/* clear all */}
+                        {todos.length > 0 && (
+                            <button
                                 onClick={() => {
-                                    handleComplete(todo.id);
+                                    updateTodos([]);
                                 }}
+                                className="text-sm text-gray-500 hover:text-gray-700"
                             >
-                                <span
+                                Clear all
+                            </button>
+                        )}
+
+                        {visibleTodos.length > 0 ? (
+                            visibleTodos.map((todo) => (
+                                <div
+                                    key={todo.id}
                                     className={twMerge(
-                                        todo.completed
-                                            ? "line-through text-gray-300"
-                                            : ""
+                                        "text-lg p-2 w-full hover:bg-gray-100 flex items-center justify-between cursor-pointer group"
                                     )}
+                                    tabIndex={0}
+                                    onKeyDown={(e) => {
+                                        if (e.key === "Enter") {
+                                            handleComplete(todo.id);
+                                        }
+                                    }}
+                                    onClick={() => {
+                                        handleComplete(todo.id);
+                                    }}
                                 >
-                                    {todo.text}
-                                </span>
-                                <button
-                                    onClick={handleDelete.bind(this, todo.id)}
-                                    className={twMerge(`ml-2 rounded-md p-1
+                                    <span
+                                        className={twMerge(
+                                            todo.completed
+                                                ? "line-through text-gray-300"
+                                                : ""
+                                        )}
+                                    >
+                                        {todo.text}
+                                    </span>
+                                    <button
+                                        onClick={handleDelete.bind(
+                                            this,
+                                            todo.id
+                                        )}
+                                        className={twMerge(`ml-2 rounded-md p-1
                                       group-hover:opacity-100 opacity-0 transition-opacity
                                       border-2 border-transparent hover:border-gray-500
                                       h-10 w-10 hover:bg-white`)}
-                                >
-                                    {/* &#10006; */}
-                                    &#x1F5D1;
-                                </button>
-                            </div>
-                        ))
-                    ) : (
-                        <div className="text-lg text-center p-4 bg-gray-50 rounded-md">
-                            <p className="text-lg text-center">
-                                You're all done for today! <br />
-                                <span className="text-sm text-gray-500">
-                                    Add a new todo to get started.
-                                </span>
-                            </p>
-                            {/* Category Tiles */}
-                            <div className="flex flex-col gap-y-2 mt-4">
-                                <h1 className="text-3xl font-extrabold">
-                                    Categories
-                                </h1>
-                                <div className="grid grid-cols-2 gap-2 py-5">
-                                    {[
-                                        "packing",
-                                        "groceries",
-                                        "work",
-                                        "school",
-                                        "fitness",
-                                        "morning",
-                                        "evening",
-                                        "weekend",
-                                    ].map((category) => (
-                                        <button
-                                            key={category}
-                                            onClick={handleCategoryClick.bind(
-                                                this,
-                                                category
-                                            )}
-                                            className={twMerge(`flex items-center justify-center text-xl cursor-pointer p-2
+                                    >
+                                        {/* &#10006; */}
+                                        &#x1F5D1;
+                                    </button>
+                                </div>
+                            ))
+                        ) : (
+                            <div className="text-lg text-center p-4 bg-gray-50 rounded-md">
+                                <p className="text-lg text-center">
+                                    You're all done for today! <br />
+                                    <span className="text-sm text-gray-500">
+                                        Add a new todo to get started.
+                                    </span>
+                                </p>
+                                {/* Category Tiles */}
+                                <div className="flex flex-col gap-y-2 mt-4">
+                                    <h1 className="text-3xl font-extrabold">
+                                        Categories
+                                    </h1>
+                                    <div className="grid grid-cols-2 gap-2 py-5">
+                                        {[
+                                            "packing",
+                                            "groceries",
+                                            "work",
+                                            "school",
+                                            "fitness",
+                                            "morning",
+                                            "evening",
+                                            "weekend",
+                                        ].map((category) => (
+                                            <button
+                                                key={category}
+                                                onClick={handleCategoryClick.bind(
+                                                    this,
+                                                    category
+                                                )}
+                                                className={twMerge(`flex items-center justify-center text-xl cursor-pointer p-2
                                       border-2 border-gray-500 rounded-md bg-white hover:bg-gray-100`)}
-                                        >
-                                            <span className="block mr-2">
-                                                {getIconForCategory(category)}
-                                            </span>
-                                            <h3 className="text-left pl-2">
-                                                {category
-                                                    .charAt(0)
-                                                    .toUpperCase() +
-                                                    category.slice(1)}
-                                            </h3>
-                                        </button>
-                                    ))}
+                                            >
+                                                <span className="block mr-2">
+                                                    {getIconForCategory(
+                                                        category
+                                                    )}
+                                                </span>
+                                                <h3 className="text-left pl-2">
+                                                    {category
+                                                        .charAt(0)
+                                                        .toUpperCase() +
+                                                        category.slice(1)}
+                                                </h3>
+                                            </button>
+                                        ))}
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    )}
+                        )}
+                    </div>
                 </div>
-            </div>
+            </section>
         </>
+    ) : (
+        // loading
+        <div className="flex items-center justify-center h-screen">
+            <p className="text-2xl font-bold text-white">Loading...</p>
+        </div>
     );
 }
 

@@ -53,7 +53,7 @@ export const ControlledMenu = ({
                 <PopoverTrigger onClick={() => setOpen((v) => !v)}>
                     {triggerMarkup}
                 </PopoverTrigger>
-                <PopoverContent className="bg-white rounded-md">
+                <PopoverContent className="bg-white rounded-md border">
                     {/* <PopoverHeading>My popover heading</PopoverHeading> */}
                     <PopoverDescription className="flex flex-col p-2">
                         {/* Menu Items */}
