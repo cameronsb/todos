@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import toast, { Toaster } from "react-hot-toast";
 import { v4 as uuidv4 } from "uuid";
 import CategoryCard from "./components/CategoryCard";
@@ -269,6 +269,7 @@ function App() {
                         {visibleTodos.length > 0 ? (
                             visibleTodos.map((todo) => (
                                 <TaskCard
+                                    key={todo.id}
                                     todo={todo}
                                     handleComplete={handleComplete}
                                     handleDelete={handleDelete}
@@ -277,7 +278,7 @@ function App() {
                         ) : (
                             <div className="text-lg text-center p-4 bg-gray-50 rounded-md">
                                 <p className="text-lg text-center">
-                                    You're all done for today! <br />
+                                    You&apos;re all done for today! <br />
                                     <span className="text-sm text-gray-500">
                                         Add a new todo to get started.
                                     </span>
@@ -303,6 +304,7 @@ function App() {
 
                                             return (
                                                 <CategoryCard
+                                                    key={category}
                                                     category={category}
                                                     icon={icon}
                                                     handleCategoryClick={
