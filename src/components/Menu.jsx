@@ -48,7 +48,7 @@ export const ControlledMenu = ({
 }) => {
     const [open, setOpen] = useState(false);
     return (
-        <div className="App">
+        <div>
             <Popover open={open} onOpenChange={setOpen}>
                 <PopoverTrigger onClick={() => setOpen((v) => !v)}>
                     {triggerMarkup}
@@ -66,7 +66,7 @@ export const ControlledMenu = ({
                                 }}
                                 className="p-2 hover:bg-gray-100 rounded-md"
                             >
-                                {option.label}
+                                {option.content}
                             </button>
                         ))}
                     </PopoverDescription>

@@ -1,8 +1,9 @@
 import React, { useEffect, useRef, useState } from "react";
 import toast, { Toaster } from "react-hot-toast";
-import { twMerge } from "tailwind-merge";
 import { v4 as uuidv4 } from "uuid";
+import CategoryCard from "./components/CategoryCard";
 import { ControlledMenu } from "./components/Menu";
+import TaskCard from "./components/TaskCard";
 import { morningTodos, packingTodos } from "./lists";
 
 function App() {
@@ -18,7 +19,13 @@ function App() {
     const getSettingsOptions = () => {
         // show a toggled on option or a toggled off option
         const hideOnCompleteOption = {
-            label: `Hide Completed Tasks: ${hideOnComplete ? "ON" : "OFF"}`,
+            content: (
+                <>
+                    <strong>Completed Tasks</strong>:{" "}
+                    {hideOnComplete ? "Hide" : "Strikethrough"}
+                </>
+            ),
+            // content: <></>,
             value: "OnComplete",
             onClick: () => {
                 updateHideOnComplete(!hideOnComplete);
@@ -28,6 +35,7 @@ function App() {
         return [hideOnCompleteOption];
     };
 
+    // * Task Creation * //
     const handleInputChange = (e) => {
         updateNewTodo(e.target.value);
     };
@@ -41,10 +49,12 @@ function App() {
         updateNewTodo("");
     };
 
+    // * Task Deletion * //
     const handleDelete = (id) => {
         updateTodos((prevTodos) => prevTodos.filter((todo) => todo.id !== id));
     };
 
+    // * Task Completion * //
     const handleComplete = (id) => {
         updateTodos((prevTodos) =>
             prevTodos.map((todo) => {
@@ -57,6 +67,7 @@ function App() {
         );
     };
 
+    // * Storage Management * //
     const getTodosFromStorage = () => {
         const todos = localStorage.getItem("todos");
 
@@ -71,6 +82,8 @@ function App() {
         localStorage.setItem("todos", JSON.stringify(todos));
     };
 
+    // * Category Support * //
+    // TODO: categories should be separate objects
     const getIconForCategory = (category) => {
         switch (category) {
             case "packing":
@@ -255,44 +268,11 @@ function App() {
 
                         {visibleTodos.length > 0 ? (
                             visibleTodos.map((todo) => (
-                                <div
-                                    key={todo.id}
-                                    className={twMerge(
-                                        "text-lg p-2 w-full hover:bg-gray-100 flex items-center justify-between cursor-pointer group"
-                                    )}
-                                    tabIndex={0}
-                                    onKeyDown={(e) => {
-                                        if (e.key === "Enter") {
-                                            handleComplete(todo.id);
-                                        }
-                                    }}
-                                    onClick={() => {
-                                        handleComplete(todo.id);
-                                    }}
-                                >
-                                    <span
-                                        className={twMerge(
-                                            todo.completed
-                                                ? "line-through text-gray-300"
-                                                : ""
-                                        )}
-                                    >
-                                        {todo.text}
-                                    </span>
-                                    <button
-                                        onClick={handleDelete.bind(
-                                            this,
-                                            todo.id
-                                        )}
-                                        className={twMerge(`ml-2 rounded-md p-1
-                                      group-hover:opacity-100 opacity-0 transition-opacity
-                                      border-2 border-transparent hover:border-gray-500
-                                      h-10 w-10 hover:bg-white`)}
-                                    >
-                                        {/* &#10006; */}
-                                        &#x1F5D1;
-                                    </button>
-                                </div>
+                                <TaskCard
+                                    todo={todo}
+                                    handleComplete={handleComplete}
+                                    handleDelete={handleDelete}
+                                />
                             ))
                         ) : (
                             <div className="text-lg text-center p-4 bg-gray-50 rounded-md">
@@ -317,29 +297,20 @@ function App() {
                                             "morning",
                                             "evening",
                                             "weekend",
-                                        ].map((category) => (
-                                            <button
-                                                key={category}
-                                                onClick={handleCategoryClick.bind(
-                                                    this,
-                                                    category
-                                                )}
-                                                className={twMerge(`flex items-center justify-center text-xl cursor-pointer p-2
-                                      border-2 border-gray-500 rounded-md bg-white hover:bg-gray-100`)}
-                                            >
-                                                <span className="block mr-2">
-                                                    {getIconForCategory(
-                                                        category
-                                                    )}
-                                                </span>
-                                                <h3 className="text-left pl-2">
-                                                    {category
-                                                        .charAt(0)
-                                                        .toUpperCase() +
-                                                        category.slice(1)}
-                                                </h3>
-                                            </button>
-                                        ))}
+                                        ].map((category) => {
+                                            const icon =
+                                                getIconForCategory(category);
+
+                                            return (
+                                                <CategoryCard
+                                                    category={category}
+                                                    icon={icon}
+                                                    handleCategoryClick={
+                                                        handleCategoryClick
+                                                    }
+                                                />
+                                            );
+                                        })}
                                     </div>
                                 </div>
                             </div>
